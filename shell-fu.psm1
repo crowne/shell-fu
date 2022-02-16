@@ -45,7 +45,40 @@ function touch {
         cmd.exe /c mklink $args
     }    
 
+    function nudir {
+      <#
+      .SYNOPSIS
+          nudir creates a new directory and changes to it
+      .DESCRIPTION
+          nudir creates a new directory and changes to it
+      
+          nudir /?
+          Creates a new directory and changes to it.
+      
+          NUDIR Target
+      
+                  Target  Specifies the new directory to be created.
+      .NOTES
+          Passes all command line arguments to cmd.exe embedded command mklink
+      .EXAMPLE
+          nudir tmp
+      
+          would create a new tmp directory and cd to it
+      #>
+          Param(
+            [Parameter(Mandatory=$true)]
+            [string]$Dir
+          )
+  
+          if (!(Test-Path $Dir)) {
+            New-Item -Type Directory -Path $Dir
+          }
+          
+          Set-Location -Path $Dir
+    }  
+
 Export-ModuleMember -Function whoami
 Export-ModuleMember -Function which
 Export-ModuleMember -Function touch
 Export-ModuleMember -Function mklink
+Export-ModuleMember -Function nudir
