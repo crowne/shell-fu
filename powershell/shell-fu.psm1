@@ -1,5 +1,28 @@
 function whoami {echo $env:UserName}
 function which($cmd) { (Get-Command $cmd).Definition }
+
+function head {
+    Param(
+        [Parameter(Mandatory=$true, Position=0)]
+        [string]$Path,
+        [Parameter(Mandatory=$false)]
+        [int]$n = 10
+    )
+    
+    Get-Content -Path $Path -TotalCount $n
+}
+
+function tail {
+    Param(
+        [Parameter(Mandatory=$true, Position=0)]
+        [string]$Path,
+        [Parameter(Mandatory=$false)]
+        [int]$n = 10
+    )
+    
+    Get-Content -Path $Path -Tail $n
+}
+
 function touch {
     Param(
       [Parameter(Mandatory=$true)]
@@ -77,6 +100,8 @@ function touch {
           Set-Location -Path $Dir
     }  
 
+Export-ModuleMember -Function head
+Export-ModuleMember -Function tail
 Export-ModuleMember -Function whoami
 Export-ModuleMember -Function which
 Export-ModuleMember -Function touch
