@@ -1,3 +1,11 @@
+function shell-fu {
+    $manifest = Join-Path $PSScriptRoot "shell-fu.psd1"
+    $version = (Import-PowerShellDataFile -Path $manifest).ModuleVersion
+    Write-Host "shell-fu v$version"
+    Write-Host "A collection of Unix-inspired PowerShell utilities."
+    Write-Host "https://github.com/crowne/shell-fu"
+}
+
 function whoami {echo $env:UserName}
 function which($cmd) { (Get-Command $cmd).Definition }
 
@@ -100,6 +108,35 @@ function touch {
           Set-Location -Path $Dir
     }  
 
+function space {
+    Param(
+        [Parameter(Mandatory=$false, Position=0)]
+        [string]$Path = "."
+    )
+
+    if (Test-Path -LiteralPath $Path -PathType Container) {
+        Get-ChildItem $Path -Directory |
+            ForEach-Object {
+                $size = (Get-ChildItem $_.FullName -Recurse -ErrorAction SilentlyContinue |
+                         Measure-Object -Property Length -Sum).Sum
+                [PSCustomObject]@{
+                    Directory = $_.FullName
+                    SizeGB    = [math]::Round($size / 1GB, 2)
+                }
+            } |
+            Sort-Object SizeGB -Descending
+    } elseif (Test-Path -LiteralPath $Path -PathType Leaf) {
+        $file = Get-Item -LiteralPath $Path
+        [PSCustomObject]@{
+            File   = $file.FullName
+            SizeMB = [math]::Round($file.Length / 1MB, 2)
+        }
+    } else {
+        Write-Error "Path '$Path' is not a valid file or directory."
+    }
+}
+
+Export-ModuleMember -Function shell-fu
 Export-ModuleMember -Function head
 Export-ModuleMember -Function tail
 Export-ModuleMember -Function whoami
@@ -107,3 +144,4 @@ Export-ModuleMember -Function which
 Export-ModuleMember -Function touch
 Export-ModuleMember -Function mklink
 Export-ModuleMember -Function nudir
+Export-ModuleMember -Function space
